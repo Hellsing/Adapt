@@ -364,14 +364,19 @@ namespace Adapt.Core
                         Log.Logger.Here().Information($"Deleting {globalCommands.Count} global commands.");
                         foreach (var command in globalCommands)
                         {
-                            await command.DeleteAsync();
+                            await command.DeleteAsync().TryCatch("Failed to delete global command!");
                         }
 
                         foreach (var guild in Client.Guilds)
                         {
                             var guildCommands = await Client.Rest.GetGuildApplicationCommands(guild.Id);
 
-                            Log.Information($"Deleting {guildCommands.Count} guild commands for the server {guild.Name} ({guild.Id}).");
+                            Log.Logger.Here().Information($"Deleting {guildCommands.Count} guild commands for the server {guild.Name} ({guild.Id}).");
+
+                            foreach (var command in guildCommands)
+                            {
+                                await command.DeleteAsync().TryCatch("Failed to delete guild command!");
+                            }
                         }
 
                         Log.Logger.Here().Information("Successfully cleared all commands.");
