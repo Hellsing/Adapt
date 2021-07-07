@@ -189,19 +189,24 @@ namespace Adapt.Core
             Settings.Instance.Save();
         }
 
-        private async Task InvokeComponentMethod(Func<IDiscordComponent, Task> invokeFunc)
+        private Task InvokeComponentMethod(Func<IDiscordComponent, Task> invokeFunc)
         {
-            foreach (var component in Components.Values)
+            Task.Run(async () =>
             {
-                try
+                foreach (var component in Components.Values)
                 {
-                    await invokeFunc.Invoke(component);
+                    try
+                    {
+                        await invokeFunc.Invoke(component);
+                    }
+                    catch (Exception e)
+                    {
+                        Log.Logger.Here().Error(e, $"Failed to invoke component method for `{component.ComponentName}`!");
+                    }
                 }
-                catch (Exception e)
-                {
-                    Log.Error(e, $"{nameof(DiscordManager)}.{nameof(InvokeComponentMethod)}: Failed to invoke component method for `{component.ComponentName}`!");
-                }
-            }
+            });
+
+            return Task.CompletedTask;
         }
 
         #region Event Handlers
