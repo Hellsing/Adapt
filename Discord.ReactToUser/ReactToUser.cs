@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using Adapt.Lib;
 using Discord.WebSocket;
-using Serilog;
 
 namespace Discord.ReactToUser
 {

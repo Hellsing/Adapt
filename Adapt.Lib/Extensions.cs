@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
@@ -69,10 +68,10 @@ namespace Adapt.Lib
         }
 
         public static async Task TryCatch(this Task task,
-                                    string errorMessage,
-                                    [CallerMemberName] string memberName = "",
-                                    [CallerFilePath] string sourceFilePath = "",
-                                    [CallerLineNumber] int sourceLineNumber = 0)
+                                          string errorMessage,
+                                          [CallerMemberName] string memberName = "",
+                                          [CallerFilePath] string sourceFilePath = "",
+                                          [CallerLineNumber] int sourceLineNumber = 0)
         {
             try
             {

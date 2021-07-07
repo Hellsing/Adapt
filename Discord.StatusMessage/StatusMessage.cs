@@ -1,6 +1,5 @@
 ﻿using System.Threading.Tasks;
 using Adapt.Lib;
-using Serilog;
 
 namespace Discord.StatusMessage
 {

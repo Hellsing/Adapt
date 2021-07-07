@@ -50,7 +50,7 @@ namespace Discord.VoiceHistory
                 await slashCommand.FollowupAsync("This command can only be used on a server!");
                 return;
             }
-            
+
             // Get the command options
             var options = slashCommand.Data?.Options;
             if (options == null || options.Count == 0)

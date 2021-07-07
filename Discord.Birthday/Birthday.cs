@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using System.Timers;
 using Adapt.Lib;
 using Discord.WebSocket;
-using Serilog;
 
 namespace Discord.Birthday
 {
