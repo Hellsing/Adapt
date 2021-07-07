@@ -1,12 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Adapt.Lib;
 using Discord.Rest;
 using Discord.WebSocket;
-using Newtonsoft.Json;
-using Serilog;
 
 namespace Discord.VoiceHistory
 {
@@ -39,11 +36,10 @@ namespace Discord.VoiceHistory
 
         public override async Task OnSlashCommandReceived(SocketSlashCommand slashCommand)
         {
-            return;
-
             // Verify command
             if (slashCommand.Data.Id != MainCommand.Id)
             {
+                await slashCommand.FollowupAsync("Command ID mismatch!");
                 return;
             }
 
@@ -54,18 +50,45 @@ namespace Discord.VoiceHistory
                 await slashCommand.FollowupAsync("This command can only be used on a server!");
                 return;
             }
-
-            try
+            
+            // Get the command options
+            var options = slashCommand.Data?.Options;
+            if (options == null || options.Count == 0)
             {
-                // Get the argument
-                await slashCommand.FollowupAsync(JsonConvert.SerializeObject(slashCommand.Data.Options.First(), Formatting.Indented).SurroundWithCodeBlock("json"));
+                await slashCommand.FollowupAsync("Command syntax failed!");
                 return;
             }
-            catch (Exception e)
+
+            // Get the server settings
+            var settings = GetServerSettings(user.Guild.Id);
+            if (settings == null)
             {
-                Log.Error(e, "Error");
+                await slashCommand.FollowupAsync("Server settings not found!");
+                return;
             }
 
+            foreach (var option in options)
+            {
+                switch (option.Name)
+                {
+                    case "target":
+                    {
+                        if (option.Value is SocketTextChannel targetChannel)
+                        {
+                            // Apply target channel argument in the settings and save
+                            settings.TargetChannelId = targetChannel.Id;
+                            SaveSettings();
+
+                            await slashCommand.FollowupAsync("Target channel successfully updated to " + targetChannel.Mention);
+                            return;
+                        }
+
+                        break;
+                    }
+                }
+            }
+
+            Log.Here().Debug("Command unsuccessfully handled.");
             await slashCommand.FollowupAsync("Unsuccessful");
         }
 
