@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Threading.Tasks;
 using Serilog;
 
 namespace Adapt.Lib
@@ -14,21 +15,7 @@ namespace Adapt.Lib
                                    [CallerFilePath] string sourceFilePath = "",
                                    [CallerLineNumber] int sourceLineNumber = 0)
         {
-
-            string fileName = null;
-            if (!string.IsNullOrWhiteSpace(sourceFilePath))
-            {
-                var split = sourceFilePath.Split(Path.PathSeparator);
-                if (split.Length > 0)
-                {
-                    fileName = split.Last();
-                }
-            }
-
-            return logger
-                  .ForContext("MemberName", memberName)
-                  .ForContext("FilePath", fileName ?? sourceFilePath)
-                  .ForContext("LineNumber", sourceLineNumber);
+            return PrepareLogger(logger, memberName, sourceFilePath, sourceLineNumber);
         }
 
         public static string FirstCharToLowerCase(this string str)
@@ -79,6 +66,36 @@ namespace Adapt.Lib
             }
 
             return sb.ToString();
+        }
+
+        public static async Task TryCatch(this Task task,
+                                    string errorMessage,
+                                    [CallerMemberName] string memberName = "",
+                                    [CallerFilePath] string sourceFilePath = "",
+                                    [CallerLineNumber] int sourceLineNumber = 0)
+        {
+            try
+            {
+                await task;
+            }
+            catch (Exception e)
+            {
+                Log.Logger.PrepareLogger(memberName, sourceFilePath, sourceLineNumber).Error(e, errorMessage);
+            }
+        }
+
+        private static ILogger PrepareLogger(this ILogger logger, string memberName = "", string sourceFilePath = "", int sourceLineNumber = 0)
+        {
+            string fileName = null;
+            if (!string.IsNullOrWhiteSpace(sourceFilePath))
+            {
+                fileName = Path.GetFileNameWithoutExtension(sourceFilePath);
+            }
+
+            return logger
+                  .ForContext("MemberName", memberName)
+                  .ForContext("FilePath", fileName ?? sourceFilePath)
+                  .ForContext("LineNumber", sourceLineNumber);
         }
     }
 }

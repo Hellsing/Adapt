@@ -20,10 +20,10 @@ namespace Adapt.Core
                         .MinimumLevel.Warning()
 #endif
                         .Enrich.FromLogContext()
-                        .WriteTo.Console(outputTemplate: "{Timestamp:HH:mm:ss} [{Level}] {FilePath}:{MemberName}: {Message}{NewLine}{Exception}")
+                        .WriteTo.Console(outputTemplate: "{Timestamp:HH:mm:ss} [{Level}] [{FilePath}.{MemberName}] {Message}{NewLine}{Exception}")
                         .CreateLogger();
 
-            Log.Information($"{nameof(Program)}.{nameof(Main)}: Loading program.");
+            Log.Logger.Here().Information("Loading program.");
 
             // Create data directory
             Directory.CreateDirectory(CoreSettings.DataDirectoryPath);
@@ -37,7 +37,7 @@ namespace Adapt.Core
             // Save settings
             Settings.Instance.Save();
 
-            Log.Information($"{nameof(Program)}.{nameof(InitializeAsync)}: Creating Discord connection...");
+            Log.Logger.Here().Information("Creating Discord connection...");
 
             try
             {
@@ -47,7 +47,7 @@ namespace Adapt.Core
             }
             catch (Exception e)
             {
-                Log.Error($"{nameof(Program)}.{nameof(InitializeAsync)}: Failed to initialize Discord connection!", e);
+                Log.Logger.Here().Error("Failed to initialize Discord connection!", e);
             }
 
             // Block the program until it is closed

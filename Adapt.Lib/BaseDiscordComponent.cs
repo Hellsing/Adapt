@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
+using Serilog;
 
 namespace Adapt.Lib
 {
@@ -45,10 +46,17 @@ namespace Adapt.Lib
 
     public abstract class BaseDiscordComponent : IDiscordComponent
     {
+        public static ILogger Log => Serilog.Log.Logger;
+
         public IDiscordManager Manager { get; set; }
 
         public abstract string ComponentName { get; protected set; }
         public abstract string ComponentDescription { get; protected set; }
+
+        public void SaveSettings()
+        {
+            Manager.SaveSettings();
+        }
 
         public virtual bool Initialize(IDiscordManager manager)
         {

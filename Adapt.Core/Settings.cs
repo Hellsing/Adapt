@@ -46,7 +46,7 @@ namespace Adapt.Core
                 }
                 catch (Exception e)
                 {
-                    Log.Error(e, $"{nameof(Settings)}.static(): Failed to load {SettingsFileName}!");
+                    Log.Logger.Here().Error(e, $"Failed to load {SettingsFileName}!");
 
                     try
                     {
@@ -54,7 +54,7 @@ namespace Adapt.Core
                     }
                     catch (Exception e1)
                     {
-                        Log.Error(e1, $"{nameof(Settings)}.static(): Failed to make backup of the old {SettingsFileName} file!");
+                        Log.Logger.Here().Error(e1, $"Failed to make backup of the old {SettingsFileName} file!");
                     }
                 }
             }
@@ -67,7 +67,7 @@ namespace Adapt.Core
                 }
                 catch (Exception e)
                 {
-                    Log.Error(e, $"{nameof(Settings)}.static(): Failed to create folder: " + ServerSettingsMainFolder);
+                    Log.Logger.Here().Error(e, "Failed to create folder: " + ServerSettingsMainFolder);
                 }
             }
 
@@ -89,25 +89,25 @@ namespace Adapt.Core
                     // Apply the converted object reference
                     DiscordComponents[componentFileName] = obj.ToObject(typeof(T));
 
-                    Log.Information($"{nameof(Settings)}.{nameof(RegisterSettings)}: Loaded settings entry for '{componentFileName}'!");
+                    Log.Logger.Here().Information($"Loaded settings entry for '{componentFileName}'!");
 
                     // Return the object reference
                     return (T) DiscordComponents[componentFileName];
                 }
                 catch (Exception e)
                 {
-                    Log.Error(e, $"{nameof(Settings)}.{nameof(RegisterSettings)}: Failed to load settings entry for '{componentFileName}'!");
+                    Log.Logger.Here().Error(e, $"Failed to load settings entry for '{componentFileName}'!");
                 }
             }
 
-            Log.Information($"{nameof(Settings)}.{nameof(RegisterSettings)}: Creating new settings entry for '{componentFileName}'!");
+            Log.Logger.Here().Information($"Creating new settings entry for '{componentFileName}'!");
 
             // Apply settings
             DiscordComponents[componentFileName] = settings;
 
             if (settings == null)
             {
-                Log.Warning($"{nameof(Settings)}.{nameof(RegisterSettings)}: Settings entry is null for \"{componentFileName}\"!");
+                Log.Logger.Here().Warning($"Settings entry is null for \"{componentFileName}\"!");
             }
 
             // Save settings
@@ -139,7 +139,7 @@ namespace Adapt.Core
                 }
                 catch (Exception e)
                 {
-                    Log.Error(e, $"Failed to create settings folder for server {guild.Name} \"{guild.Id}\"!");
+                    Log.Logger.Here().Error(e, $"Failed to create settings folder for server {guild.Name} \"{guild.Id}\"!");
                     return;
                 }
             }
@@ -156,11 +156,11 @@ namespace Adapt.Core
                         dynamic deserialized = JsonConvert.DeserializeObject(File.ReadAllText(filePath), serverSetting.Item2);
                         settings[guild.Id] = deserialized;
 
-                        Log.Debug($"Loaded server settings for component \"{serverSetting.Item3}\" for server \"{guild.Id}\"!");
+                        Log.Logger.Here().Debug($"Loaded server settings for component \"{serverSetting.Item3}\" for server \"{guild.Id}\"!");
                     }
                     catch (Exception e)
                     {
-                        Log.Error(e, $"Failed to load server settings for module {serverSetting.Item3}, server {guild.Name} \"{guild.Id}\"!");
+                        Log.Logger.Here().Error(e, $"Failed to load server settings for module {serverSetting.Item3}, server {guild.Name} \"{guild.Id}\"!");
                     }
                 }
 
@@ -174,11 +174,11 @@ namespace Adapt.Core
                     dynamic instance = Activator.CreateInstance(serverSetting.Item2);
                     settings[guild.Id] = instance;
 
-                    Log.Debug($"Created blank settings file for component \"{serverSetting.Item3}\" for server \"{guild.Id}\"!");
+                    Log.Logger.Here().Debug($"Created blank settings file for component \"{serverSetting.Item3}\" for server \"{guild.Id}\"!");
                 }
                 catch (Exception e)
                 {
-                    Log.Error(e, $"Failed to create an instance of {serverSetting.Item2.FullName}!");
+                    Log.Logger.Here().Error(e, $"Failed to create an instance of {serverSetting.Item2.FullName}!");
                     settings[guild.Id] = null;
                 }
             }
@@ -209,7 +209,7 @@ namespace Adapt.Core
             }
             catch (Exception e)
             {
-                Log.Error(e, $"{nameof(Settings)}.{nameof(Save)}: Failed to save {SettingsFileName}!");
+                Log.Logger.Here().Error(e, $"Failed to save {SettingsFileName}!");
             }
         }
 

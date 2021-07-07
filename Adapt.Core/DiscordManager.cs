@@ -27,8 +27,8 @@ namespace Adapt.Core
             // Validate bot token
             if (string.IsNullOrWhiteSpace(Settings.Instance.Discord.BotToken))
             {
-                Log.Warning($"{nameof(DiscordManager)}.{nameof(InitializeDiscordConnection)}: Please set a valid Discord bot token!");
-                Log.Warning($"{nameof(DiscordManager)}.{nameof(InitializeDiscordConnection)}: Discord connection aborted!");
+                Log.Logger.Here().Warning("Please set a valid Discord bot token!");
+                Log.Logger.Here().Warning("Discord connection aborted!");
                 return;
             }
 
@@ -72,7 +72,7 @@ namespace Adapt.Core
             #endregion
 
             // Initialize components
-            Log.Information($"{nameof(DiscordManager)}.{nameof(InitializeDiscordConnection)}: Loading Discord components...");
+            Log.Logger.Here().Information("Loading Discord components...");
 
             #region Assembly Loading
 
@@ -83,13 +83,13 @@ namespace Adapt.Core
 
                 // Get a list of assemblies inside the folder
                 var fileList = Directory.GetFiles(CoreSettings.ComponentAssemblyFolder, "*.dll");
-                Log.Debug($"{nameof(DiscordManager)}.{nameof(InitializeDiscordConnection)}: Found a total of {fileList.Length} files!");
+                Log.Logger.Here().Debug($"Found a total of {fileList.Length} files!");
 
                 var type = typeof(IDiscordComponent);
 
                 foreach (var file in fileList)
                 {
-                    Log.Debug($"{nameof(DiscordManager)}.{nameof(InitializeDiscordConnection)}: {file}");
+                    Log.Logger.Here().Debug(file);
 
                     var fileName = Path.GetFileName(file);
 
@@ -99,7 +99,7 @@ namespace Adapt.Core
                         var assembly = Assembly.LoadFile(Path.GetFullPath(file));
                         var types = assembly.GetTypes().Where(o => type.IsAssignableFrom(o)).ToList();
 
-                        Log.Debug($"{nameof(DiscordManager)}.{nameof(InitializeDiscordConnection)}: Found a total of {types.Count} valid types!");
+                        Log.Logger.Here().Debug($"Found a total of {types.Count} valid types!");
 
                         foreach (var component in types)
                         {
@@ -116,7 +116,7 @@ namespace Adapt.Core
                             }
                             catch (Exception e)
                             {
-                                Log.Error(e, $"{nameof(DiscordManager)}.{nameof(InitializeDiscordConnection)}: Failed to apply reflection on '{component.FullName}' in '{file}'!");
+                                Log.Logger.Here().Error(e, $"Failed to apply reflection on '{component.FullName}' in '{file}'!");
 
                                 Components[fileName] = null;
                             }
@@ -124,23 +124,23 @@ namespace Adapt.Core
                     }
                     catch (Exception e)
                     {
-                        Log.Error(e, $"{nameof(DiscordManager)}.{nameof(InitializeDiscordConnection)}: Failed to load assembly '{file}'!");
+                        Log.Logger.Here().Error(e, $"Failed to load assembly '{file}'!");
                     }
                 }
             }
             catch (Exception e)
             {
-                Log.Error(e, $"{nameof(DiscordManager)}.{nameof(InitializeDiscordConnection)}: Failed to load Discord component!");
+                Log.Logger.Here().Error(e, "Failed to load Discord component!");
             }
 
             #endregion
 
             // Inform about the loaded components
-            Log.Information($"{nameof(DiscordManager)}.{nameof(InitializeDiscordConnection)}: Loaded the following Discord components:");
+            Log.Logger.Here().Information("Loaded the following Discord components:");
             foreach (var component in Components.Values)
             {
-                Log.Information($"{nameof(DiscordManager)}.{nameof(InitializeDiscordConnection)}:  - " + component.ComponentName);
-                Log.Information($"{nameof(DiscordManager)}.{nameof(InitializeDiscordConnection)}:        " + component.ComponentDescription);
+                Log.Logger.Here().Information(" - " + component.ComponentName);
+                Log.Logger.Here().Information("       " + component.ComponentDescription);
             }
 
             try
@@ -151,7 +151,7 @@ namespace Adapt.Core
             }
             catch (Exception e)
             {
-                Log.Error(e, $"{nameof(DiscordManager)}.{nameof(InitializeDiscordConnection)}: Failed to start Discord client!");
+                Log.Logger.Here().Error(e, "Failed to start Discord client!");
                 throw;
             }
         }
@@ -230,36 +230,36 @@ namespace Adapt.Core
                 // Let the components create their commands
                 await InvokeComponentMethod(component => component.CreateCommands(Client.Rest));
             }
-            
+
             await InvokeComponentMethod(component => component.OnReady());
         }
 
         private async Task ClientOnLog(LogMessage logMessage)
         {
-            var message = $"{nameof(DiscordManager)}.{logMessage.Source}: {logMessage.Message}";
+            var message = $"[{logMessage.Source}] {logMessage.Message}";
 
             if (logMessage.Exception != null)
             {
-                Log.Error(logMessage.Exception, message);
+                Log.Logger.Here().Error(logMessage.Exception, message);
             }
 
             switch (logMessage.Severity)
             {
                 case LogSeverity.Critical:
                 case LogSeverity.Error:
-                    Log.Error(message);
+                    Log.Logger.Here().Error(message);
                     break;
                 case LogSeverity.Warning:
-                    Log.Warning(message);
+                    Log.Logger.Here().Warning(message);
                     break;
                 case LogSeverity.Info:
-                    Log.Information(message);
+                    Log.Logger.Here().Information(message);
                     break;
                 case LogSeverity.Verbose:
-                    Log.Verbose(message);
+                    Log.Logger.Here().Verbose(message);
                     break;
                 case LogSeverity.Debug:
-                    Log.Debug(message);
+                    Log.Logger.Here().Debug(message);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -354,14 +354,14 @@ namespace Adapt.Core
                 // Internal Refresh Command handling
                 if (slashCommand.Data.Id == RefreshCommand.Id)
                 {
-                    Log.Information("A client requested the refreshing of all commands.");
+                    Log.Logger.Here().Information("A client requested the refreshing of all commands.");
 
                     try
                     {
                         // Get all global commands except this one
                         var globalCommands = (await Client.Rest.GetGlobalApplicationCommands()).Where(o => o.Id != RefreshCommand.Id).ToList();
-                        
-                        Log.Information($"Deleting {globalCommands.Count} global commands.");
+
+                        Log.Logger.Here().Information($"Deleting {globalCommands.Count} global commands.");
                         foreach (var command in globalCommands)
                         {
                             await command.DeleteAsync();
@@ -374,14 +374,14 @@ namespace Adapt.Core
                             Log.Information($"Deleting {guildCommands.Count} guild commands for the server {guild.Name} ({guild.Id}).");
                         }
 
-                        Log.Information("Successfully cleared all commands.");
+                        Log.Logger.Here().Information("Successfully cleared all commands.");
                     }
                     catch (Exception e)
                     {
-                        Log.Error(e, "Error during command clearing!");
+                        Log.Logger.Here().Error(e, "Error during command clearing!");
                     }
 
-                    Log.Information($"Invoking {nameof(IDiscordComponent.CreateCommands)}() for all components loaded.");
+                    Log.Logger.Here().Information($"Invoking {nameof(IDiscordComponent.CreateCommands)}() for all components loaded.");
                     await InvokeComponentMethod(component => component.CreateCommands(Client.Rest));
 
                     await slashCommand.FollowupAsync("All commands refreshed!");
