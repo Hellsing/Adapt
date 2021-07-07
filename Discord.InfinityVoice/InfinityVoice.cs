@@ -23,28 +23,27 @@ namespace Discord.InfinityVoice
 
         public override async Task OnReady()
         {
-            // Validate parent channels are existing
+            // Validate parent channels are existing   
             foreach (var channelId in GeneratedChannel.Channels.Keys.ToArray())
             {
-                if (Discord.GetVoiceChannel(channelId) == null)
+                var parentFound = Manager.Guilds.Any(guild => guild.GetVoiceChannel(channelId) != null);
+                if (parentFound)
                 {
-                    // Remove all remaining generated channels
-                    foreach (var generated in GeneratedChannel.Channels[channelId])
-                    {
-                        var voiceChannel = generated.VoiceChannel;
-                        if (voiceChannel != null)
-                        {
-                            // Delete the generated channel
-                            await voiceChannel.DeleteAsync();
-                        }
-                    }
-
-                    // Remove the entry from the collection
-                    GeneratedChannel.Channels.Remove(channelId);
-
-                    // Save file
-                    GeneratedChannel.SaveToFile();
+                    continue;
                 }
+
+                // Loop through all generated channels with valid voice channels
+                foreach (var voiceChannel in GeneratedChannel.Channels[channelId].Select(generated => generated.VoiceChannel).Where(voiceChannel => voiceChannel != null))
+                {
+                    // Delete the generated channel
+                    await voiceChannel.DeleteAsync().TryCatch("Failed to delete channel!");
+                }
+
+                // Remove the entry from the collection
+                GeneratedChannel.Channels.Remove(channelId);
+
+                // Save file
+                GeneratedChannel.SaveToFile();
             }
 
             // Validate all generated channels
