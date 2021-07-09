@@ -41,6 +41,9 @@ namespace Adapt.Core
 
             #region Event Handler Registration
 
+            // Initialize the slash command listener class
+            SlashCommandListener.Initialize(this);
+
             // Listen to required events
             Client.Log += ClientOnLog;
             Client.Ready += ClientOnReady;
@@ -390,6 +393,9 @@ namespace Adapt.Core
                     {
                         Log.Logger.Here().Error(e, "Error during command clearing!");
                     }
+
+                    // Clear slash command listener
+                    SlashCommandListener.Clear();
 
                     Log.Logger.Here().Information($"Invoking {nameof(IDiscordComponent.CreateCommands)}() for all components loaded.");
                     await InvokeComponentMethod(component => component.CreateCommands(Client.Rest));

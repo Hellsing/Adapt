@@ -1,12 +1,20 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Library</OutputType>
     <TargetFramework>net5.0</TargetFramework>
+    <SignAssembly>false</SignAssembly>
+    <AssemblyOriginatorKeyFile>Adapt.Lib.pfx</AssemblyOriginatorKeyFile>
+    <DelaySign>false</DelaySign>
+    <Authors>Hellsing</Authors>
+    <RepositoryUrl>https://github.com/Hellsing/Adapt</RepositoryUrl>
+    <RepositoryType>Git</RepositoryType>
+    <Copyright>Hellsing 2021</Copyright>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Discord.Net.Labs" Version="2.4.4" />
+    <InternalsVisibleTo Include="Adapt.Core" />
+    <PackageReference Include="Discord.Net.Labs" Version="2.4.5" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="Serilog" Version="2.10.0" />
     <PackageReference Include="Serilog.Sinks.Console" Version="3.1.1" />
