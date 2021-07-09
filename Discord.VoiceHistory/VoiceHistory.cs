@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
 using Adapt.Lib;
@@ -17,79 +17,45 @@ namespace Discord.VoiceHistory
         public override async Task CreateCommands(DiscordSocketRestClient client)
         {
             // Create the commands
-            MainCommand = await client.CreateGlobalCommand(new SlashCommandCreationProperties
-            {
-                Name = nameof(VoiceHistory).SeparateUpperCase('-').ToLower(),
-                Description = $"Everything regarding the {nameof(VoiceHistory)} component.",
-                Options = new List<ApplicationCommandOptionProperties>
-                {
-                    new()
-                    {
-                        Type = ApplicationCommandOptionType.Channel,
-                        Name = "target",
-                        Description = "Defines the target channel to log the activities to.",
-                        Required = true
-                    }
-                }
-            });
+            MainCommand = await client.CreateGlobalCommand(new SlashCommandBuilder()
+                                                          .WithName(nameof(VoiceHistory).SeparateUpperCase('-').ToLower())
+                                                          .WithDescription($"Everything regarding the {nameof(VoiceHistory)} component.")
+                                                          .AddOption(new SlashCommandOptionBuilder()
+                                                                    .WithName("target")
+                                                                    .WithType(ApplicationCommandOptionType.Channel)
+                                                                    .WithDescription("Defines the target channel to log the activities to.")
+                                                                    .WithRequired(true))
+                                                          .Build());
+
+            MainCommand.ListenOptions(OnTargetCommand, "target");
         }
 
-        public override async Task OnSlashCommandReceived(SocketSlashCommand slashCommand)
+        private async Task OnTargetCommand(SocketSlashCommand command, ImmutableDictionary<string, SocketSlashCommandDataOption> options)
         {
-            // Verify command
-            if (slashCommand.Data.Id != MainCommand.Id)
-            {
-                await slashCommand.FollowupAsync("Command ID mismatch!");
-                return;
-            }
-
             // Verify it's used on a server
-            var user = slashCommand.User as SocketGuildUser;
+            var user = command.User as SocketGuildUser;
             if (user == null)
             {
-                await slashCommand.FollowupAsync("This command can only be used on a server!");
-                return;
-            }
-
-            // Get the command options
-            var options = slashCommand.Data?.Options;
-            if (options == null || options.Count == 0)
-            {
-                await slashCommand.FollowupAsync("Command syntax failed!");
+                await command.FollowupAsync("This command can only be used on a server!");
                 return;
             }
 
             // Get the server settings
             var settings = GetServerSettings(user.Guild.Id);
-            if (settings == null)
+
+            var channel = options["target"].Value as SocketChannel;
+            if (channel is SocketTextChannel targetChannel)
             {
-                await slashCommand.FollowupAsync("Server settings not found!");
+                // Apply target channel argument in the settings and save
+                settings.TargetChannelId = targetChannel.Id;
+                SaveSettings();
+
+                await command.FollowupAsync("Target channel successfully updated to " + targetChannel.Mention);
                 return;
             }
 
-            foreach (var option in options)
-            {
-                switch (option.Name)
-                {
-                    case "target":
-                    {
-                        if (option.Value is SocketTextChannel targetChannel)
-                        {
-                            // Apply target channel argument in the settings and save
-                            settings.TargetChannelId = targetChannel.Id;
-                            SaveSettings();
-
-                            await slashCommand.FollowupAsync("Target channel successfully updated to " + targetChannel.Mention);
-                            return;
-                        }
-
-                        break;
-                    }
-                }
-            }
-
-            Log.Here().Debug("Command unsuccessfully handled.");
-            await slashCommand.FollowupAsync("Unsuccessful");
+            // Invalid channel type given
+            await command.FollowupAsync("Channel type given was not a text channel!");
         }
 
         public override async Task OnUserVoiceStateUpdated(SocketUser user, SocketVoiceState previousState, SocketVoiceState newState)
