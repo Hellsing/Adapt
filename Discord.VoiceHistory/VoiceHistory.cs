@@ -18,7 +18,7 @@ namespace Discord.VoiceHistory
         {
             // Create the commands
             MainCommand = await client.CreateGlobalCommand(new SlashCommandBuilder()
-                                                          .WithName(nameof(VoiceHistory).SeparateUpperCase('-').ToLower())
+                                                          .WithName(nameof(VoiceHistory).SeparateByUpperCase('-').ToLower())
                                                           .WithDescription($"Everything regarding the {nameof(VoiceHistory)} component.")
                                                           .AddOption(new SlashCommandOptionBuilder()
                                                                     .WithName("target")

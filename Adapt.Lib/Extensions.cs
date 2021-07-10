@@ -37,7 +37,7 @@ namespace Adapt.Lib
             return sb.ToString();
         }
 
-        public static string SeparateUpperCase(this string input, char separator)
+        public static string SeparateByUpperCase(this string input, char separator)
         {
             if (string.IsNullOrEmpty(input))
             {
