@@ -14,10 +14,10 @@
 
   <ItemGroup>
     <InternalsVisibleTo Include="Adapt.Core" />
-    <PackageReference Include="Discord.Net.Labs" Version="2.4.5" />
+    <PackageReference Include="Discord.Net.Labs" Version="2.4.8" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="Serilog" Version="2.10.0" />
-    <PackageReference Include="Serilog.Sinks.Console" Version="3.1.1" />
+    <PackageReference Include="Serilog.Sinks.Console" Version="4.0.0" />
   </ItemGroup>
 
 </Project>
