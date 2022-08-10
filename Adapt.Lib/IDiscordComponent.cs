@@ -25,7 +25,7 @@ namespace Adapt.Lib
         Task OnMessageDeleted(Cacheable<IMessage, ulong> message, Cacheable<IMessageChannel, ulong> channel);
 
         Task OnUserJoined(SocketGuildUser user);
-        Task OnUserLeft(SocketGuildUser user);
+        Task OnUserLeft(SocketGuild guild, SocketUser user);
 
         Task OnChannelCreated(SocketChannel channel);
         Task OnChannelDestroyed(SocketChannel channel);

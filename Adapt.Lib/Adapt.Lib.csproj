@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Library</OutputType>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <SignAssembly>false</SignAssembly>
     <AssemblyOriginatorKeyFile>Adapt.Lib.pfx</AssemblyOriginatorKeyFile>
     <DelaySign>false</DelaySign>
@@ -14,10 +14,10 @@
 
   <ItemGroup>
     <InternalsVisibleTo Include="Adapt.Core" />
-    <PackageReference Include="Discord.Net.Labs" Version="2.4.9" />
+    <PackageReference Include="Discord.Net" Version="3.7.2" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
-    <PackageReference Include="Serilog" Version="2.10.0" />
-    <PackageReference Include="Serilog.Sinks.Console" Version="4.0.0" />
+    <PackageReference Include="Serilog" Version="2.11.0" />
+    <PackageReference Include="Serilog.Sinks.Console" Version="4.0.1" />
   </ItemGroup>
 
 </Project>

@@ -35,8 +35,7 @@ namespace Adapt.Core
             // Create Discord client instance
             Client = new DiscordSocketClient(new DiscordSocketConfig
             {
-                DefaultRetryMode = RetryMode.AlwaysRetry,
-                AlwaysAcknowledgeInteractions = true
+                DefaultRetryMode = RetryMode.AlwaysRetry
             });
 
             #region Event Handler Registration
@@ -229,10 +228,9 @@ namespace Adapt.Core
             if (RefreshCommand == null)
             {
                 // Create the refresh command
-                RefreshCommand = await Client.Rest.CreateGlobalCommand(new SlashCommandCreationProperties
+                RefreshCommand = await Client.Rest.CreateGlobalCommand(new UserCommandProperties
                 {
-                    Name = "refresh-commands",
-                    Description = "Deletes all commands and forces the components to re-register their commands."
+                    Name = "refresh-commands"
                 });
 
                 // Let the components create their commands
@@ -291,9 +289,9 @@ namespace Adapt.Core
             await InvokeComponentMethod(component => component.OnUserJoined(user));
         }
 
-        private async Task ClientOnUserLeft(SocketGuildUser user)
+        private async Task ClientOnUserLeft(SocketGuild guild, SocketUser user)
         {
-            await InvokeComponentMethod(component => component.OnUserLeft(user));
+            await InvokeComponentMethod(component => component.OnUserLeft(guild, user));
         }
 
         private async Task ClientOnChannelCreated(SocketChannel channel)

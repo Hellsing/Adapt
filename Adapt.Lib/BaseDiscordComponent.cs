@@ -96,7 +96,7 @@ namespace Adapt.Lib
             return Task.CompletedTask;
         }
 
-        public virtual Task OnUserLeft(SocketGuildUser user)
+        public virtual Task OnUserLeft(SocketGuild guild, SocketUser user)
         {
             return Task.CompletedTask;
         }
