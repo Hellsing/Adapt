@@ -78,10 +78,18 @@ namespace Adapt.Core
 
             #region Assembly Loading
 
+            // Add an assembly resolver
+            AppDomain.CurrentDomain.AssemblyResolve += delegate(object sender, ResolveEventArgs args)
+            {
+                var assemblyPath = Path.Combine(CoreSettings.ComponentAssemblyFolder, "lib", new AssemblyName(args.Name).Name + ".dll");
+                return !File.Exists(assemblyPath) ? null : Assembly.LoadFrom(assemblyPath);
+            };
+
             try
             {
-                // Create directory
+                // Create directories
                 Directory.CreateDirectory(CoreSettings.ComponentAssemblyFolder);
+                Directory.CreateDirectory(Path.Combine(CoreSettings.ComponentAssemblyFolder, "lib"));
 
                 // Get a list of assemblies inside the folder
                 var fileList = Directory.GetFiles(CoreSettings.ComponentAssemblyFolder, "*.dll");
@@ -98,29 +106,39 @@ namespace Adapt.Core
                     try
                     {
                         // Load assembly
-                        var assembly = Assembly.LoadFile(Path.GetFullPath(file));
-                        var types = assembly.GetTypes().Where(o => type.IsAssignableFrom(o)).ToList();
+                        var assembly = Assembly.LoadFrom(Path.GetFullPath(file));
 
-                        Log.Logger.Here().Debug($"Found a total of {types.Count} valid types!");
-
-                        foreach (var component in types)
+                        if (assembly != null)
                         {
-                            try
+                            var rawTypes = assembly.GetTypes();
+                            if (rawTypes != null)
                             {
-                                var instance = (IDiscordComponent) Activator.CreateInstance(component);
-                                Components[fileName] = instance;
-
-                                var methodInfo = component.GetMethod(nameof(IDiscordComponent.Initialize));
-                                if (methodInfo != null)
+                                var types = rawTypes.Where(o => type.IsAssignableFrom(o)).ToList();
+                                if (types.Count > 0)
                                 {
-                                    methodInfo.Invoke(instance, new object[] { this });
-                                }
-                            }
-                            catch (Exception e)
-                            {
-                                Log.Logger.Here().Error(e, $"Failed to apply reflection on '{component.FullName}' in '{file}'!");
+                                    Log.Logger.Here().Debug($"Found a total of {types.Count} valid types!");
 
-                                Components[fileName] = null;
+                                    foreach (var component in types)
+                                    {
+                                        try
+                                        {
+                                            var instance = (IDiscordComponent)Activator.CreateInstance(component);
+                                            Components[fileName] = instance;
+
+                                            var methodInfo = component.GetMethod(nameof(IDiscordComponent.Initialize));
+                                            if (methodInfo != null)
+                                            {
+                                                methodInfo.Invoke(instance, new object[] { this });
+                                            }
+                                        }
+                                        catch (Exception e)
+                                        {
+                                            Log.Logger.Here().Error(e, $"Failed to apply reflection on '{component.FullName}' in '{file}'!");
+
+                                            Components[fileName] = null;
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
