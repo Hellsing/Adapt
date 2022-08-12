@@ -6,7 +6,6 @@ using System.Reflection;
 using System.Threading.Tasks;
 using Adapt.Lib;
 using Discord;
-using Discord.Rest;
 using Discord.WebSocket;
 using Serilog;
 
@@ -35,7 +34,8 @@ namespace Adapt.Core
             // Create Discord client instance
             Client = new DiscordSocketClient(new DiscordSocketConfig
             {
-                DefaultRetryMode = RetryMode.AlwaysRetry
+                DefaultRetryMode = RetryMode.AlwaysRetry,
+                GatewayIntents = GatewayIntents.All
             });
 
             #region Event Handler Registration
