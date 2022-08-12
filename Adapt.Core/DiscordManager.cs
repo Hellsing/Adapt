@@ -20,7 +20,7 @@ namespace Adapt.Core
         public IReadOnlyCollection<SocketGuild> Guilds => Client?.Guilds;
 
         private bool ServersInitialized { get; set; }
-        private RestGlobalCommand RefreshCommand { get; set; }
+        private bool CommandsCreated { get; set; }
 
         public async Task InitializeDiscordConnection()
         {
@@ -243,13 +243,9 @@ namespace Adapt.Core
                 }
             }
 
-            if (RefreshCommand == null)
+            if (!CommandsCreated)
             {
-                // Create the refresh command
-                RefreshCommand = await Client.Rest.CreateGlobalCommand(new UserCommandProperties
-                {
-                    Name = "refresh-commands"
-                });
+                CommandsCreated = true;
 
                 // Let the components create their commands
                 await InvokeComponentMethod(component => component.CreateCommands(Client.Rest));
@@ -286,7 +282,7 @@ namespace Adapt.Core
                     Log.Logger.Here().Debug(message);
                     break;
                 default:
-                    throw new ArgumentOutOfRangeException();
+                    throw new ArgumentOutOfRangeException(logMessage.Severity.ToString());
             }
 
             await InvokeComponentMethod(component => component.OnLog(logMessage));
@@ -375,52 +371,6 @@ namespace Adapt.Core
 
             if (interaction is SocketSlashCommand slashCommand)
             {
-                // Internal Refresh Command handling
-                if (slashCommand.Data.Id == RefreshCommand.Id)
-                {
-                    Log.Logger.Here().Information("A client requested the refreshing of all commands.");
-
-                    try
-                    {
-                        // Get all global commands except this one
-                        var globalCommands = (await Client.Rest.GetGlobalApplicationCommands()).Where(o => o.Id != RefreshCommand.Id).ToList();
-
-                        Log.Logger.Here().Information($"Deleting {globalCommands.Count} global commands.");
-                        foreach (var command in globalCommands)
-                        {
-                            await command.DeleteAsync().TryCatch("Failed to delete global command!");
-                        }
-
-                        foreach (var guild in Client.Guilds)
-                        {
-                            var guildCommands = await Client.Rest.GetGuildApplicationCommands(guild.Id);
-
-                            Log.Logger.Here().Information($"Deleting {guildCommands.Count} guild commands for the server {guild.Name} ({guild.Id}).");
-
-                            foreach (var command in guildCommands)
-                            {
-                                await command.DeleteAsync().TryCatch("Failed to delete guild command!");
-                            }
-                        }
-
-                        Log.Logger.Here().Information("Successfully cleared all commands.");
-                    }
-                    catch (Exception e)
-                    {
-                        Log.Logger.Here().Error(e, "Error during command clearing!");
-                    }
-
-                    // Clear slash command listener
-                    SlashCommandListener.Clear();
-
-                    Log.Logger.Here().Information($"Invoking {nameof(IDiscordComponent.CreateCommands)}() for all components loaded.");
-                    await InvokeComponentMethod(component => component.CreateCommands(Client.Rest));
-
-                    await slashCommand.FollowupAsync("All commands refreshed!");
-                    return;
-                }
-
-                // All other commands
                 await InvokeComponentMethod(component => component.OnSlashCommandReceived(slashCommand));
             }
         }
