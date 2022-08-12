@@ -20,7 +20,7 @@ namespace Adapt.Core
                         .MinimumLevel.Warning()
 #endif
                         .Enrich.FromLogContext()
-                        .WriteTo.Console(outputTemplate: "{Timestamp:HH:mm:ss} [{Level}] [{FilePath}.{MemberName}] {Message}{NewLine}{Exception}")
+                        .WriteTo.Console(outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message}{NewLine}{Exception}")
                         .CreateLogger();
 
             Log.Logger.Here().Information("Loading program.");
