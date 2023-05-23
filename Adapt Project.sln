@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.30503.244
+# Visual Studio Version 17
+VisualStudioVersion = 17.6.33717.318
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Adapt.Core", "Adapt.Core\Adapt.Core.csproj", "{2ADC763A-3DDC-4609-86E7-87ED0E6CC50A}"
 EndProject
@@ -17,7 +17,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Discord.VoiceHistory", "Dis
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Discord.InfinityVoice", "Discord.InfinityVoice\Discord.InfinityVoice.csproj", "{6753D988-273C-4540-A193-632C9E19F9A3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Discord.TestPlugin", "Discord.TestPlugin\Discord.TestPlugin.csproj", "{A7EE789D-7E39-40C8-BB03-BCD14F63E23F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Discord.TestPlugin", "Discord.TestPlugin\Discord.TestPlugin.csproj", "{A7EE789D-7E39-40C8-BB03-BCD14F63E23F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
