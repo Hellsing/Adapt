@@ -120,6 +120,12 @@ namespace Discord.VoiceHistory
 
             var userName = hasPermission ? $"`{guildUser.Username}#{guildUser.Discriminator}`" : guildUser.Mention;
 
+            // Check if the user has a new Discord username
+            if (hasPermission && guildUser.DiscriminatorValue == 0)
+            {
+                userName = guildUser.Nickname ?? guildUser.Username;
+            }
+
             if (oldChannel != null)
             {
                 if (newChannel == null)
