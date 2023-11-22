@@ -17,6 +17,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Discord.VoiceHistory", "Dis
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Discord.TestPlugin", "Discord.TestPlugin\Discord.TestPlugin.csproj", "{A7EE789D-7E39-40C8-BB03-BCD14F63E23F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Adapt.InfiniteVoice", "Adapt.InfiniteVoice\Adapt.InfiniteVoice.csproj", "{11BA967E-5347-467C-BD5E-7D093173C801}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -51,6 +53,10 @@ Global
 		{A7EE789D-7E39-40C8-BB03-BCD14F63E23F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A7EE789D-7E39-40C8-BB03-BCD14F63E23F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A7EE789D-7E39-40C8-BB03-BCD14F63E23F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{11BA967E-5347-467C-BD5E-7D093173C801}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{11BA967E-5347-467C-BD5E-7D093173C801}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{11BA967E-5347-467C-BD5E-7D093173C801}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{11BA967E-5347-467C-BD5E-7D093173C801}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
