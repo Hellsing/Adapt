@@ -44,6 +44,7 @@ public class InfiniteVoice : BaseDiscordComponent<GlobalSettings, ServerSettings
     {
         // TODO: Check for black-/whitelist
         // TODO: Check for permissions on channel
+        // TODO: Include channel moved check new/old for black-/whitelist and permissions
 
         // Grab properties
         var previousCh = previousState.VoiceChannel;
@@ -87,14 +88,78 @@ public class InfiniteVoice : BaseDiscordComponent<GlobalSettings, ServerSettings
                 // We can safely delete the temporary channel here
                 await DeleteTemporaryChannel(channel);
             }
-        }
+            else
+            {
+                // Get all child channels by this parent
+                var childChannels = GetChildChannels(channel);
 
-        // TODO: Check for all temp channels by this parent
+                // Check if any of them is empty
+                foreach (var temporaryChannel in childChannels)
+                {
+                    var childHandle = temporaryChannel.GetHandle(channel);
+                    if (childHandle.ConnectedUsers.Count == 0)
+                    {
+                        // Delete the empty child channel
+                        await DeleteTemporaryChannel(childHandle);
+                    }
+                }
+            }
+        }
     }
 
-    private async Task ChannelJoined(SocketVoiceChannel channel) { }
+    private async Task ChannelJoined(SocketVoiceChannel channel)
+    {
+        // Check if user count is now exactly 1, meaning it's a fresh join
+        if (channel.ConnectedUsers.Count != 1)
+        {
+            return;
+        }
 
-    private async Task ChannelMoved(SocketVoiceChannel previousChannel, SocketVoiceChannel newChannel) { }
+        // Get the parent channel
+        var parent = GetParentChannel(channel);
+
+        // Create a new temporary channel, as the channel is now occupied
+        await CreateTemporaryChannel(parent);
+    }
+
+    private async Task ChannelMoved(SocketVoiceChannel previousChannel, SocketVoiceChannel newChannel)
+    {
+        // Get the parent channels for both channels
+        var parent1 = GetParentChannel(previousChannel);
+        var parent2 = GetParentChannel(newChannel);
+
+        // Check if they share the parent
+        var sharedParent = parent1.Id == parent2.Id;
+        if (!sharedParent)
+        {
+            // Call left/joined methods for those channels as they don't share the parent
+            await ChannelJoined(newChannel);
+            await ChannelLeft(previousChannel);
+
+            Log.Here().Debug("User moved to different parent channel cluster");
+            return;
+        }
+
+        // Get the user counts
+        var previousCount = previousChannel.ConnectedUsers.Count;
+        var newCount = newChannel.ConnectedUsers.Count;
+
+        // Check if move doesn't affect anything
+        if ((previousCount > 0 && newCount > 1) ||
+            (previousCount == 0 && newCount == 1))
+        {
+            Log.Here().Debug("User channel move doesn't affect temporary channels");
+            return;
+        }
+
+        // TODO: Include white and blacklist checks and permissions for the next part
+
+        // Check the previous channel needs to be deleted
+        if (previousCount == 0 && newCount > 1)
+        {
+            // TODO
+        }
+    }
 
     private List<TemporaryChannel> GeTemporaryChannels(ulong serverId)
     {
@@ -102,22 +167,60 @@ public class InfiniteVoice : BaseDiscordComponent<GlobalSettings, ServerSettings
         var allTempChannels = GetServerSettings(serverId).TemporaryChannels;
 
         // Check if there is already an instance for this server
-        if (!allTempChannels.ContainsKey(serverId))
+        if (!allTempChannels.TryGetValue(serverId, out var value))
         {
+            // Create a new collection
+            value = new();
+
             // Create new instance
-            allTempChannels.Add(serverId, new List<TemporaryChannel>());
+            allTempChannels.Add(serverId, value);
 
             // Save settings
             SaveSettings();
         }
 
-        return allTempChannels[serverId];
+        return value;
+    }
+
+    private List<TemporaryChannel> GetChildChannels(ulong serverId, ulong channelId)
+    {
+        return GetServerSettings(serverId).TemporaryChannels.GetValueOrDefault(channelId) ?? new();
+    }
+
+    private List<TemporaryChannel> GetChildChannels(SocketVoiceChannel channel)
+    {
+        return GetChildChannels(channel.Guild.Id, channel.Id);
+    }
+
+    private SocketVoiceChannel GetParentChannel(SocketVoiceChannel channel)
+    {
+        foreach (var entry in GetServerSettings(channel.Guild.Id).TemporaryChannels)
+        {
+            // Check if the key is matching the requested channel, indicating it's a parent channel
+            if (entry.Key == channel.Id)
+            {
+                return channel;
+            }
+
+            // Try to get the channel as temporary channel
+            var tempChannel = entry.Value.Find(o => o.ChannelId == channel.Id);
+            if (tempChannel != null)
+            {
+                // Return the parent channel
+                return tempChannel.GetParent(channel);
+            }
+        }
+
+        // Channel not recognized, meaning it's a parent channel
+        return channel;
     }
 
     private bool IsTemporaryChannel(SocketVoiceChannel channel)
     {
         return GeTemporaryChannels(channel.Guild.Id).Any(o => o.ChannelId == channel.Id);
     }
+
+    private async Task CreateTemporaryChannel(SocketVoiceChannel parentChannel) { }
 
     private async Task DeleteTemporaryChannel(SocketVoiceChannel channel)
     {
