@@ -7,8 +7,7 @@ public class InfiniteVoice : BaseDiscordComponent<GlobalSettings, ServerSettings
 {
     public override string ComponentName { get; protected set; } = nameof(InfiniteVoice);
 
-    public override string ComponentDescription { get; protected set; } =
-        "Creates an infinite amount of voice channels once a channel gets occupied.";
+    public override string ComponentDescription { get; protected set; } = "Creates an infinite amount of voice channels once a channel gets occupied.";
 
     public override Task OnReady()
     {
@@ -33,8 +32,8 @@ public class InfiniteVoice : BaseDiscordComponent<GlobalSettings, ServerSettings
         }
 
         if (changed)
-            // Save the settings
         {
+            // Save the settings
             SaveSettings();
         }
 
@@ -81,14 +80,15 @@ public class InfiniteVoice : BaseDiscordComponent<GlobalSettings, ServerSettings
     {
         // Check if the channel is now empty
         if (channel.ConnectedUsers.Count == 0)
-            // Check if it's a temporary channel
         {
+            // Check if it's a temporary channel
             if (IsTemporaryChannel(channel))
-                // We can safely delete the temporary channel here
             {
+                // We can safely delete the temporary channel here
                 await DeleteTemporaryChannel(channel);
             }
         }
+
         // TODO: Check for all temp channels by this parent
     }
 
