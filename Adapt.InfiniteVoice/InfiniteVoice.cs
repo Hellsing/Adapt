@@ -94,7 +94,7 @@ public class InfiniteVoice : BaseDiscordComponent<GlobalSettings, ServerSettings
                 var childChannels = GetChildChannels(channel);
 
                 // Check if any of them is empty
-                foreach (var temporaryChannel in childChannels)
+                foreach (var temporaryChannel in childChannels.ToArray())
                 {
                     var childHandle = temporaryChannel.GetHandle(channel);
                     if (childHandle.ConnectedUsers.Count == 0)
